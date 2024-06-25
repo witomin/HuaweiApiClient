@@ -33,11 +33,8 @@ namespace HuaweiApiClientTests {
         {
             string username = "admin";
             string password = "validpass";
-
-
-            huaweisms.api.User user = new huaweisms.api.User(ctx);
-
-            var res = user.Login(username, password);
+            Client client = new Client(ctx);
+            var res = client.Login(username, password);
 
             Assert.IsTrue(ctx.LoggedIn);
 
@@ -50,9 +47,9 @@ namespace HuaweiApiClientTests {
             string password = "invalidpass";
 
 
-            huaweisms.api.User user = new huaweisms.api.User(ctx);
+            Client client = new Client(ctx);
 
-            var res = user.Login(username, password);
+            var res = client.Login(username, password);
 
             Assert.IsFalse(ctx.LoggedIn);
 

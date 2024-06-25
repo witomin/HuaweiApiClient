@@ -1,3 +1,4 @@
+using HuaweiApiClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace HuaweiApiClientTests {
@@ -5,15 +6,15 @@ namespace HuaweiApiClientTests {
     public class SMSTest
     {
 
-        private ApiConfig config;
-        private ApiCtx ctx;
+        private APIConfig config;
+        private APIContext ctx;
 
         [TestInitialize]
         public void init()
         {
-            config = new ApiConfig();
+            config = new APIConfig();
             config.BaseURL = "http://192.168.8.1";
-            ctx = new ApiCtx(config);
+            ctx = new APIContext(config);
         }
 
 
@@ -23,15 +24,14 @@ namespace HuaweiApiClientTests {
             string username = "admin";
             string password = "validpass";
 
-            User user = new User(ctx);
-            api.SMS sms = new SMS(ctx);
+            Client client = new Client(ctx);
 
-            var res = user.Login(username, password);
+            var res = client.Login(username, password);
 
             Assert.IsTrue(ctx.LoggedIn);
 
-            res = sms.SendSMS("+12223334444", "This is first message from C# API");
-            res = sms.SendSMS("+12223334444", "This is second message from C# API");
+            res = client.SendSMS("+12223334444", "This is first message from C# API");
+            res = client.SendSMS("+12223334444", "This is second message from C# API");
 
 
         }
