@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HuaweiModemDotNetAPIClientLibrary\HuaweiModemDotNetAPIClientLibrary.csproj" />
+    <ProjectReference Include="..\HuaweiModemDotNetAPIClientLibrary\HuaweiApiClient.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,21 +1,19 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
-namespace HuaweiModemDotNetAPIClientTests
-{
+namespace HuaweiApiClientTests {
     [TestClass]
     public class SMSTest
     {
 
-        private huaweisms.data.ApiConfig config;
-        private huaweisms.data.ApiCtx ctx;
+        private ApiConfig config;
+        private ApiCtx ctx;
 
         [TestInitialize]
         public void init()
         {
-            config = new huaweisms.data.ApiConfig();
+            config = new ApiConfig();
             config.BaseURL = "http://192.168.8.1";
-            ctx = new huaweisms.data.ApiCtx(config);
+            ctx = new ApiCtx(config);
         }
 
 
@@ -25,8 +23,8 @@ namespace HuaweiModemDotNetAPIClientTests
             string username = "admin";
             string password = "validpass";
 
-            huaweisms.api.User user = new huaweisms.api.User(ctx);
-            huaweisms.api.SMS sms = new huaweisms.api.SMS(ctx);
+            User user = new User(ctx);
+            api.SMS sms = new SMS(ctx);
 
             var res = user.Login(username, password);
 

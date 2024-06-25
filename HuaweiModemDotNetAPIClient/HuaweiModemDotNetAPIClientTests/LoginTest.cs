@@ -1,30 +1,29 @@
+using HuaweiApiClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
-namespace HuaweiModemDotNetAPIClientTests
-{
+namespace HuaweiApiClientTests {
     [TestClass]
     public class LoginTest
     {
 
-        private huaweisms.data.ApiConfig config;
-        private huaweisms.data.ApiCtx ctx;
+        private APIConfig config;
+        private APIContext ctx;
 
         [TestInitialize]
         public void init()
         {
-            config = new huaweisms.data.ApiConfig();
+            config = new APIConfig();
             config.BaseURL = "http://192.168.8.1";
-            ctx = new huaweisms.data.ApiCtx(config);
+            ctx = new APIContext(config);
         }
 
         [TestMethod]
         public void TestSesTokInfo()
         {
-            huaweisms.api.WebServer webServer = new huaweisms.api.WebServer(ctx);
-            var res = webServer.SesTokInfo();
+            Client client = new Client(ctx);
+            var res = client.SesTokInfo();
             Assert.IsNotNull(res.Response);
-            Assert.Equals(res.Type, huaweisms.data.ApiResponse.ApiResponseType.XML);
+            Assert.Equals(res.Type, APIResponse.ApiResponseType.XML);
             Assert.IsTrue(ctx.VerificationTokensCount > 0);
             Assert.IsNotNull(ctx.SessionId);
         }
