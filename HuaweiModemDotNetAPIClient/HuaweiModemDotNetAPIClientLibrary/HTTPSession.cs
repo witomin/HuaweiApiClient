@@ -10,9 +10,9 @@ namespace HuaweiApiClient {
         const string SESSION_ID_COOKIE = "SessionID";
 
 
-        public HTTPSession(APIContext apiCtx) {
-            this.config = apiCtx.Config;
-            this.ctx = apiCtx;
+        public HTTPSession(APIContext apiContext) {
+            config = apiContext.Config;
+            context = apiContext;
             // setup http client
             HttpClient = new HttpClient(new HttpClientHandler() { UseCookies = false });
             HttpClient.Timeout = TimeSpan.FromMilliseconds(config.HttpTimeout);
@@ -20,7 +20,7 @@ namespace HuaweiApiClient {
         }
 
         private APIConfig config;
-        private APIContext ctx;
+        private APIContext context;
 
 
         public APIConfig ApiConfig {
@@ -41,7 +41,7 @@ namespace HuaweiApiClient {
                     string[] securityHeaders = header.Split(new char[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
                     if (securityHeaders != null && securityHeaders.Length > 0) {
                         // only add the first one
-                        ctx.AddRequestVerificationToken(securityHeaders[0]);
+                        context.AddRequestVerificationToken(securityHeaders[0]);
                     }
                 }
             }
@@ -49,7 +49,7 @@ namespace HuaweiApiClient {
             if (response.Headers.TryGetValues(SET_COOKIE_HEADER, out headerValues)) {
                 foreach (string header in headerValues) {
                     if (header.StartsWith(SESSION_ID_COOKIE + "=")) {
-                        ctx.SessionId = header.Substring((SESSION_ID_COOKIE + "=").Length);
+                        context.SessionId = header.Substring((SESSION_ID_COOKIE + "=").Length);
 
                     }
                 }
@@ -58,22 +58,32 @@ namespace HuaweiApiClient {
         }
 
         private void setupRequestHeaders(HttpRequestMessage requestMessage) {
-            if (ctx.VerificationTokensCount > 0) {
-                requestMessage.Headers.Add(REQUEST_VERIFICATION_TOKEN_HEADER, ctx.NextRequestVerificationToken());
+            if (context.VerificationTokensCount > 0) {
+                requestMessage.Headers.Add(REQUEST_VERIFICATION_TOKEN_HEADER, context.NextRequestVerificationToken());
             }
-            if (ctx.SessionId != null) {
+            if (context.SessionId != null) {
                 requestMessage.Headers.Remove(COOKIE_HEADER);
-                requestMessage.Headers.Add(COOKIE_HEADER, $"{SESSION_ID_COOKIE}={ctx.SessionId}");
+                requestMessage.Headers.Add(COOKIE_HEADER, $"{SESSION_ID_COOKIE}={context.SessionId}");
             }
         }
-
-        public APIResponse HttpGet(String url) {
+        public APIResponse HttpGet(string url) {
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, url)) {
                 setupRequestHeaders(requestMessage);
                 var response = HttpClient.SendAsync(requestMessage).Result;
                 if (response.IsSuccessStatusCode) {
                     updateSecurityHeaders(response);
                     return APIResponse.ReadAndCreateApiResponse(response);
+                }
+                throw new Exception("HTTP request failed: " + response.ReasonPhrase);
+            }
+        }
+            public APIResponse HttpGet<T>(string url) {
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, url)) {
+                setupRequestHeaders(requestMessage);
+                var response = HttpClient.SendAsync(requestMessage).Result;
+                if (response.IsSuccessStatusCode) {
+                    updateSecurityHeaders(response);
+                    return APIResponse.ReadAndCreateApiResponse<T>(response);
                 }
                 throw new Exception("HTTP request failed: " + response.ReasonPhrase);
             }

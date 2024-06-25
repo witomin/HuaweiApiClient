@@ -1,11 +1,11 @@
 ﻿namespace HuaweiApiClient {
 
     public abstract class API {
-        public API(APIContext ctx) {
-            this.Ctx = ctx;
+        public API(APIContext context) {
+            this.Context = context;
         }
 
-        public APIContext Ctx {
+        public APIContext Context {
             get; private set;
         }
 

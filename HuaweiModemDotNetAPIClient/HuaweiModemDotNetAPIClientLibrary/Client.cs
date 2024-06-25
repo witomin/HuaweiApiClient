@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using HuaweiApiClient.Responses;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace HuaweiApiClient {
@@ -11,12 +12,12 @@ namespace HuaweiApiClient {
         }
 
         public APIResponse SesTokInfo() {
-            var response = Ctx.Session.HttpGet($"{Ctx.Config.BaseURL}/api/webserver/SesTokInfo");
+            var response = Context.Session.HttpGet($"{Context.Config.BaseURL}/api/webserver/SesTokInfo");
 
             if (response.Response.ContainsKey("SesInfo") && response.Response.ContainsKey("TokInfo")) {
                 // setup context values
-                Ctx.AddRequestVerificationToken(response.Response["TokInfo"] as string);
-                Ctx.SessionId = (response.Response["SesInfo"] as string).Substring("SessionID=".Length);
+                Context.AddRequestVerificationToken(response.Response["TokInfo"] as string);
+                Context.SessionId = (response.Response["SesInfo"] as string).Substring("SessionID=".Length);
                 return response;
             }
             else {
@@ -32,25 +33,21 @@ namespace HuaweiApiClient {
         }
 
         private string getPasswordValue(string loginToken, string username, string password) {
-
-            // password calculation is:
-            // b64(sha256(username + b64(sha256(password)) + loginToken))
-
             return b64_hex_sha256(username + b64_hex_sha256(password) + loginToken);
         }
 
         public APIResponse Login(string username, string password) {
-            if (Ctx.SessionId == null) {
+            if (Context.SessionId == null) {
                 // first, setup a session
-                var webServerAPI = new Client(Ctx);
+                var webServerAPI = new Client(Context);
                 var innerReponse = webServerAPI.SesTokInfo();
-                if (Ctx.SessionId == null) {
-                    throw new System.Exception("Can't get SessionID. Impossible to continue");
+                if (Context.SessionId == null) {
+                    throw new Exception("Can't get SessionID. Impossible to continue");
                 }
             }
 
-            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(password);
-            var password4 = getPasswordValue(Ctx.CurrentRequestVerificationToken(), username, password);
+            var plainTextBytes = Encoding.UTF8.GetBytes(password);
+            var password4 = getPasswordValue(Context.CurrentRequestVerificationToken(), username, password);
 
             string xml = $@"<?xml version:""1.0"" encoding=""UTF - 8""?>
 <request>
@@ -59,10 +56,10 @@ namespace HuaweiApiClient {
 <password_type>4</password_type>
 </request>";
 
-            var response = Ctx.Session.HttpPostXML($"{Ctx.Config.BaseURL}/api/user/login", xml);
+            var response = Context.Session.HttpPostXML($"{Context.Config.BaseURL}/api/user/login", xml);
 
             if (response.Response.Count == 0) {
-                Ctx.LoggedIn = true;
+                Context.LoggedIn = true;
             }
 
             return response;
@@ -74,16 +71,16 @@ namespace HuaweiApiClient {
         }
 
         public APIResponse SendSMS(string[] phones, string message) {
-            if (!Ctx.LoggedIn) {
-                throw new System.Exception("You need to call User.Login(user,pass) first");
+            if (!Context.LoggedIn) {
+                throw new Exception("You need to call User.Login(user,pass) first");
             }
 
             if (phones == null || phones.Length == 0) {
-                throw new System.Exception("You need to call providing at least ONE phone number for SMS submission");
+                throw new Exception("You need to call providing at least ONE phone number for SMS submission");
             }
 
             if (message == null || message.Length == 0) {
-                throw new System.Exception("You need to call providing a non-null non-empty message for SMS submission");
+                throw new Exception("You need to call providing a non-null non-empty message for SMS submission");
             }
 
             string phoneTags = "";
@@ -102,14 +99,17 @@ namespace HuaweiApiClient {
     <Date>{String.Format("{0:u}", DateTime.Now)}</Date>
 </request>";
 
-            var response = Ctx.Session.HttpPostXML($"{Ctx.Config.BaseURL}/api/sms/send-sms", xml);
+            var response = Context.Session.HttpPostXML($"{Context.Config.BaseURL}/api/sms/send-sms", xml);
 
             return response;
 
         }
-
-    public APIResponse GetWifiClients() {
-            var response = Ctx.Session.HttpGet($"{Ctx.Config.BaseURL}/api/wlan/host-list");
+        /// <summary>
+        /// Получить список подключенных клиентов WiFi
+        /// </summary>
+        /// <returns></returns>
+        public APIResponse GetWifiClients() {
+            var response = Context.Session.HttpGet<HostListResponse>($"{Context.Config.BaseURL}/api/wlan/host-list");
 
             return response;
         }
